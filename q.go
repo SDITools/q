@@ -36,8 +36,6 @@ type Message struct {
 	Body          string
 }
 
-type poller func([]*Message, error)
-
 func (qq *Queue) Receive() (msgs []*Message, err error) {
 	ms, err := qq.sqs.ReceiveMessage(qq.params.receiveMessageInput)
 
@@ -80,7 +78,7 @@ func (qq *Queue) Shift() ([]*Message, error) {
 	return msgs, delErr
 }
 
-func (qq *Queue) Poll(p poller) {
+func (qq *Queue) Poll(msgCh chan<- string, errCh chan<- error) {
 	qq.poll = true
 
 	for {
@@ -90,9 +88,15 @@ func (qq *Queue) Poll(p poller) {
 
 		msgs, err := qq.Shift()
 
-		// naïve: the p process could take a long time--don't want these channels
-		// to back up/exhaust our resources.
-		go p(msgs, err)
+		if len(msgs) > 0 {
+			for _, msg := range msgs {
+				msgCh <- msg.Body
+			}
+		}
+
+		if err != nil && err != ErrNotFound {
+			errCh <- err
+		}
 	}
 }
 
@@ -119,9 +123,10 @@ func (qp *QueueParams) defaults(endpoint string) {
 	}
 }
 
-func New(endpoint string, params QueueParams) *Queue {
+func New(endpoint string, region string, params QueueParams) *Queue {
 	params.defaults(endpoint)
 	return &Queue{
+		sqs:      sqs.New(&aws.Config{Region: region}),
 		params:   params,
 		endpoint: endpoint,
 	}
