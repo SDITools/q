@@ -1,6 +1,8 @@
 # Q
 
-Tiny Go library for receiving messages from AWS Simple Queue Service.  Supports "shifting" messages and polling.
+Tiny Go library for receiving messages from AWS Simple Queue Service.
+
+A wrapper for the [AWS Labs SQS library](https://github.com/awslabs/aws-sdk-go/tree/master/service/sqs), Q provides facilities for "shifting" messages and polling.
 
 
 ## Usage
