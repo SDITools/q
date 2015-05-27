@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	. "bitbucket.org/searchdiscovery/q"
 	"github.com/awslabs/aws-sdk-go/aws"
 	"github.com/awslabs/aws-sdk-go/service/sqs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/sditools/q"
 )
 
 const REGION = "us-east-1"
@@ -22,7 +22,8 @@ var queue *Queue
 var _ = BeforeSuite(func() {
 
 	svc = sqs.New(&aws.Config{
-		Region: *aws.String(REGION),
+		Credentials: aws.DefaultChainCredentials,
+		Region:      *aws.String(REGION),
 	})
 
 	timestamp := time.Now().Local().Format("20060102150405")

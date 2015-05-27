@@ -126,7 +126,10 @@ func (qp *QueueParams) defaults(endpoint string) {
 func New(endpoint string, region string, params QueueParams) *Queue {
 	params.defaults(endpoint)
 	return &Queue{
-		sqs:      sqs.New(&aws.Config{Region: region}),
+		sqs: sqs.New(&aws.Config{
+			Credentials: aws.DefaultChainCredentials,
+			Region:      region,
+		}),
 		params:   params,
 		endpoint: endpoint,
 	}

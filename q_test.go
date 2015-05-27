@@ -1,7 +1,7 @@
 package q_test
 
 import (
-	. "bitbucket.org/searchdiscovery/q"
+	. "github.com/sditools/q"
 
 	"time"
 
