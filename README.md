@@ -11,7 +11,7 @@ A wrapper for the [AWS Labs SQS library](https://github.com/awslabs/aws-sdk-go/t
 import (
   "fmt"
   "log"
-  "bitbucket.org/searchdiscovery/q"
+  "github.com/SDITools/q"
 )
 
 var queue = q.New("[your queue url]", "us-east-1", q.QueueParams{})
