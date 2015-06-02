@@ -19,7 +19,7 @@ type Queue struct {
 	endpoint string
 	params   QueueParams
 	sqs      *sqs.SQS
-	poll     bool
+	stopCh   chan int
 }
 
 type QueueParams struct {
@@ -79,13 +79,7 @@ func (qq *Queue) Shift() ([]*Message, error) {
 }
 
 func (qq *Queue) Poll(msgCh chan<- string, errCh chan<- error) {
-	qq.poll = true
-
 	for {
-		if !qq.poll {
-			break
-		}
-
 		msgs, err := qq.Shift()
 
 		if len(msgs) > 0 {
@@ -97,11 +91,18 @@ func (qq *Queue) Poll(msgCh chan<- string, errCh chan<- error) {
 		if err != nil && err != ErrNotFound {
 			errCh <- err
 		}
+
+		select {
+		case <-qq.stopCh:
+			break
+		default:
+			continue
+		}
 	}
 }
 
 func (qq *Queue) StopPoll() {
-	qq.poll = false
+	qq.stopCh <- 1
 }
 
 func (qp *QueueParams) defaults(endpoint string) {
@@ -132,5 +133,6 @@ func New(endpoint string, region string, params QueueParams) *Queue {
 		}),
 		params:   params,
 		endpoint: endpoint,
+		stopCh:   make(chan int),
 	}
 }
