@@ -80,23 +80,21 @@ func (qq *Queue) Shift() ([]*Message, error) {
 
 func (qq *Queue) Poll(msgCh chan<- string, errCh chan<- error) {
 	for {
-		msgs, err := qq.Shift()
-
-		if len(msgs) > 0 {
-			for _, msg := range msgs {
-				msgCh <- msg.Body
-			}
-		}
-
-		if err != nil && err != ErrNotFound {
-			errCh <- err
-		}
-
 		select {
 		case <-qq.stopCh:
 			break
 		default:
-			continue
+			msgs, err := qq.Shift()
+
+			if len(msgs) > 0 {
+				for _, msg := range msgs {
+					msgCh <- msg.Body
+				}
+			}
+
+			if err != nil && err != ErrNotFound {
+				errCh <- err
+			}
 		}
 	}
 }
